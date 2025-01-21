@@ -676,19 +676,33 @@ const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbx4yRGdZmufKaX
 submitBtn.addEventListener('click', (event) => {
     event.preventDefault(); // Prevent default form submission
 
-    let name = nameEl.value.trim();
-    let email = emailEl.value.trim();
+    const name = nameEl.value.trim();
+    const email = emailEl.value.trim();
 
-    if (name.length > 3 && email.includes("@")) {
+    if (name.length > 3 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        // Make POST request to the Google Apps Script Web App
         fetch(GOOGLE_SHEET_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name, email })
         })
-        .then(response => response.text())
-        .then(data => console.log("Data saved:", data))
-        .catch(error => console.error("Error:", error));
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                console.log("Data saved successfully:", data.message);
+                alert("Your data has been saved!");
+                nameEl.value = ""; // Clear the name input
+                emailEl.value = ""; // Clear the email input
+            } else {
+                console.error("Error saving data:", data.message);
+                alert("An error occurred: " + data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Network or server error:", error);
+            alert("A network or server error occurred. Please try again.");
+        });
     } else {
-        console.error("Invalid input: Name must be longer than 3 characters and Email must be valid.");
+        alert("Invalid input: Name must be longer than 3 characters and Email must be valid.");
     }
 });
