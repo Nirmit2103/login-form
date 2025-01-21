@@ -664,3 +664,31 @@ function createPullingTimeline(isFixed, BtnPulled) {
 
     return tl;
 }
+
+
+
+const submitBtn = document.querySelector('.form-container .form-row input[type="submit"]');
+const nameEl = document.querySelector('.form-container .form-row input[name="name"]');
+const emailEl = document.querySelector('.form-container .form-row input[name="email"]');
+
+const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbx4yRGdZmufKaXdIiN5UnKWVX1jpYLqvWNFNlKQ1_Aa_SxhUCnK8s5tzp8nESBfqczhaA/exec";
+
+submitBtn.addEventListener('click', (event) => {
+    event.preventDefault(); // Prevent default form submission
+
+    let name = nameEl.value.trim();
+    let email = emailEl.value.trim();
+
+    if (name.length > 3 && email.includes("@")) {
+        fetch(GOOGLE_SHEET_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, email })
+        })
+        .then(response => response.text())
+        .then(data => console.log("Data saved:", data))
+        .catch(error => console.error("Error:", error));
+    } else {
+        console.error("Invalid input: Name must be longer than 3 characters and Email must be valid.");
+    }
+});
